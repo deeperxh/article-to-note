@@ -1,0 +1,15 @@
+{
+  "mode": null,
+  "targetLanguage": null,
+  "titleStyle": null,
+  "titlePrefix": null,
+  "customTitle": null,
+  "images": null,
+  "studyAids": null,
+  "keepSource": null,
+  "outputDir": null,
+  "backend": null,
+  "cdpEndpoint": null,
+  "browserProfile": null,
+  "browserChannel": null
+}

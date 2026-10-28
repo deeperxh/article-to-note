@@ -1,0 +1,12 @@
+node_modules/
+.env
+.env.*
+!.env.example
+preferences.local.json
+notes/
+coverage/
+*.log
+browser-profile/
+browser_data/
+storage-state*.json
+cookies*.json
