@@ -1,11 +1,16 @@
 {
   "name": "article-to-note",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "private": true,
   "type": "module",
   "description": "Portable agent skill for saving web articles as illustrated Markdown notes",
   "engines": { "node": ">=20" },
-  "scripts": { "test": "node --test" },
+  "scripts": {
+    "check": "node scripts/doctor.mjs",
+    "test": "node --test",
+    "test:core": "node --test tests/article-note.test.mjs tests/learning-note.test.mjs tests/doctor.test.mjs",
+    "test:browser": "node --test tests/browser.test.mjs"
+  },
   "optionalDependencies": {
     "playwright": "^1.61.0",
     "turndown": "^7.2.0",

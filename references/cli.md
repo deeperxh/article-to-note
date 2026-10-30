@@ -2,7 +2,16 @@
 
 Optional persistent close-reading Q&A uses a separate entrypoint, `node scripts/learning-note.mjs --help`. It does not change capture/finalize/verify commands. Read [learning.md](learning.md) for the one-question-at-a-time host workflow, UTF-8 text inputs, revision checks, pause/resume and output repair.
 
-Run commands from any directory with an absolute or skill-relative path to `scripts/article-note.mjs`. Requires Node.js 20+, no npm installation. Quote paths with spaces. On Windows use PowerShell; on macOS/Linux use the local shell. JSON and Markdown files are UTF-8.
+Run commands using an absolute path resolved from the loaded SKILL.md, or change to its directory before using the relative examples below. Requires Node.js 20+, no npm installation. Quote paths with spaces. On Windows use PowerShell; on macOS/Linux use the local shell. JSON and Markdown files are UTF-8. The separate Skills CLI installer requires Node.js ≥22.20.0.
+
+## Installation check
+
+```sh
+node scripts/doctor.mjs
+node scripts/doctor.mjs --browser
+```
+
+The first command checks runtime, required files, matching package/lockfile versions, and reports optional module availability. Missing optional packages do not fail a core installation. `--browser` also requires the Markdown conversion and Playwright modules. It never opens a browser, contacts services, reads credentials, or proves that the host has activated the skill. Run it from the actual installed copy; `skill.root` reports the resolved path. Both modes return JSON and a nonzero exit when their required checks fail.
 
 The no-install requirement applies to Firecrawl/plain import only. The host skill first checks existing-browser tools for supported Zhihu pages; [host-browser.md](host-browser.md) explains `browser-script --url URL --action inspect|expand|scroll` and `capture --snapshot JSON`. This bridge needs Turndown/GFM, not a Playwright connection or another login. The optional standalone fallback needs Playwright and a browser; see [browser.md](browser.md). Add `--backend browser` plus exactly one of `--cdp LOOPBACK_ENDPOINT` or `--profile EXTERNAL_DIR`; default backend remains Firecrawl for CLI compatibility. `--snapshot` cannot be combined with another import source or connection options. Do not silently upload logged-in content.
 

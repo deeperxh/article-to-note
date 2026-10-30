@@ -1,4 +1,4 @@
-# Local browser capture (Zhihu v0.2.1)
+# Local browser capture (Zhihu)
 
 **First choice is the user's existing browser through the host's browser/extension tools.** Follow [host-browser.md](host-browser.md) before requesting CDP or a dedicated profile. No debugging port is needed when the host can already access the logged-in tab. The standalone CLI modes below are fallbacks, not mandatory onboarding for all users.
 
@@ -15,7 +15,7 @@ In the skill directory run `npm ci` (or `npm install` if no lockfile). Browser s
 These commands do not install a browser extension or extract account credentials. To check optional dependencies without opening a browser:
 
 ```sh
-node --input-type=module -e "import('./scripts/browser-capture.mjs').then(m => m.browserLibraries()).then(() => console.log('Browser dependencies ready'))"
+node scripts/doctor.mjs --browser
 ```
 
 ## Fallback: reuse a browser session via CDP

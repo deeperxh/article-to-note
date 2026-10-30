@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Optional reading sessions. No model, browser, or API dependency.
 import { readFile, writeFile, appendFile, rename, unlink, lstat, open } from 'node:fs/promises';
+import { realpathSync } from 'node:fs';
 import path from 'node:path';
 import { createHash, randomUUID } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
@@ -194,6 +195,6 @@ export async function main(argv) {
   }
   console.log(json(await learning(action, options)));
 }
-if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
+if (process.argv[1] && import.meta.url === pathToFileURL(realpathSync(process.argv[1])).href) {
   main(process.argv.slice(2)).catch(e => { console.error(`Error: ${e.message}`); process.exitCode = 1; });
 }

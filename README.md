@@ -1,241 +1,150 @@
-# Article to Note — 把网页阅读变成 Obsidian 笔记
+# Article to Note Skill
 
-**在 AI 智能体中保存文章、全文翻译、双语精读，再把你的理解和问答记录留在自己的知识库里。**
+把网页文章保存为带来源和配图的 Markdown，在 Claude Code、Codex、Cursor 等智能体中完成全文翻译、双语阅读和可恢复的精读问答。
 
-An agent skill for saving web articles as Obsidian-ready Markdown, with local images, full translation, bilingual editions, and resumable close-reading Q&A. Includes a browser adapter for individual Zhihu answers and articles.
+A portable Agent Skill for web articles → Markdown notes, with local images, full translation, bilingual editions, and resumable reading Q&A.
 
-适合使用 Codex 等支持 Agent Skills 的智能体、希望积累中英文阅读笔记的用户。输出是普通 Markdown 和本地附件，可以保存到 Obsidian 库，也可以使用其他 Markdown 工具阅读。
+**Repository:** [deeperxh/article-to-note](https://github.com/deeperxh/article-to-note) · **Skill name:** `article-to-note` · Alternative name: `article-to-note-skill`.
 
-## 能做什么
+Article to Note is an AI agent skill and web clipper for saving articles as Obsidian-compatible Markdown. It can translate complete articles, create bilingual notes, download images, and continue a close-reading conversation. It supports compatible agents including Codex, Claude Code, and Cursor; see the verified scope below.
 
-| 场景 | 你会得到什么 |
-| --- | --- |
-| 收藏一篇文章 | 保留来源的 Markdown 笔记，可选下载配图 |
-| 阅读外文长文 | 全文翻译或段落对齐的双语版本，保留代码和图片位置 |
-| 保存知乎内容 | 面向单个回答、专栏文章的本地浏览器适配与抓取检查 |
-| 精读并检验理解 | 一次一个问题、你的原始回答、AI 反馈和原文依据 |
-| 中断后接着读 | 从文章目录恢复问题与回答，不必依赖旧聊天记录 |
+## Find and install this skill
 
-由宿主 Agent 理解、翻译和提问，脚本负责抓取、图片下载、文件保存与检查。无需为翻译或问答额外接入模型 API；宿主模型和 Firecrawl 服务可能各自产生费用。
+**Article to Note** (`article-to-note`) is an AI agent skill for turning a web page or article URL into a local Markdown note. It is useful for article clipping, Obsidian notes, English-to-Chinese translation, bilingual reading, image downloads, and studying articles with questions. It also supports individual Zhihu answers and articles. 网页转 Markdown、文章翻译、双语笔记、知乎文章保存和精读问答都可以使用它。
+
+Give your coding agent the repository URL when asking it to install the skill. A name-only search may miss it: Codex's `skill-installer` searches its curated list by default, while other discovery directories have their own indexes. A missing search result does not prevent installation directly from the public repository.
+
+[skills.sh](https://skills.sh/) lists skills using installation telemetry; appearance and search ranking are controlled by that service and are not guaranteed by this repository.
+
+### 让 AI 帮你安装 / Ask an AI to install
+
+将以下内容发给支持安装本地技能的 AI 编程助手：
+
+> 请安装 GitHub 仓库 https://github.com/deeperxh/article-to-note 中的 `article-to-note` skill。`SKILL.md` 位于仓库根目录，请安装完整目录，包括 `scripts/`、`references/`、`package.json` 和 `package-lock.json`，不要只复制 `SKILL.md`。安装后从安装目录运行 `node scripts/doctor.mjs`，并告知我如何在新会话中使用。
+
+For an English prompt: “Install the `article-to-note` skill from https://github.com/deeperxh/article-to-note. The skill is at the repository root; install the complete directory, run `node scripts/doctor.mjs` from the installed directory, and tell me how to use it in a new session.”
+
+Codex 的 `$skill-installer` 默认按名称查找精选列表，不会按名称搜索所有 GitHub 仓库。指定上述仓库，并告诉它根目录路径为 `.`、安装名称为 `article-to-note`；其安装脚本对应参数为 `--repo deeperxh/article-to-note --path . --name article-to-note`。也可使用下面的 Skills CLI 安装方式。
 
 ## 安装
 
-以下命令用于本机 Codex，需要已安装 **Git** 和 **Node.js 20+**。选择自己系统对应的一条命令执行：
+```sh
+npx skills add deeperxh/article-to-note -g
+```
 
-**macOS / Linux**
+需要 **Git** 和 **Node.js ≥22.20.0** 来运行 [Skills CLI](https://github.com/vercel-labs/skills)。按提示选择智能体；也可以直接指定，任选一条：
 
 ```sh
-git clone https://github.com/deeperxh/article-to-note.git ~/.agents/skills/article-to-note
+npx skills add deeperxh/article-to-note -g -a claude-code
+npx skills add deeperxh/article-to-note -g -a codex
+npx skills add deeperxh/article-to-note -g -a cursor
 ```
 
-**Windows PowerShell**
+`-g` 安装到用户目录，供多个项目使用；只在当前项目使用时，先进入项目，再省略 `-g`。安装器默认将主副本放到 `~/.agents/skills/article-to-note/`，按所选智能体创建必要的目录链接；`--copy` 改为独立复制。共用目录不意味着所有智能体都会自动读取它。
 
-```powershell
-git clone https://github.com/deeperxh/article-to-note.git "$env:USERPROFILE\.agents\skills\article-to-note"
+Windows PowerShell 若拦截 `npx.ps1`，使用 `npx.cmd`。安装器要求 Node.js ≥22.20.0，本项目脚本仍支持 20+；遇到 `EBADENGINE` 或缺少 `zlib.crc32` 时，升级 Node.js 后重试。安装命令只获取技能，不自动配置抓取服务或浏览器依赖。
+
+在安装器显示的技能目录运行：
+
+```sh
+node scripts/doctor.mjs
 ```
 
-这会将整个项目安装到 Codex 的个人技能目录，本项目自带的 `SKILL.md` 和配套脚本会一起下载，无需自己创建文件。若 Codex 没有发现新技能，重新打开 Codex 后再试。
-
-没有安装 Git、想用 ZIP 下载，或遇到问题？查看 [详细安装指南](docs/installation.md)。已安装过本项目的用户请勿重复 clone；通过 Git 安装的副本可在安装目录执行 `git pull` 更新，保留有改动的文件后再处理冲突。
+自检会显示实际路径、版本、缺失文件和可选依赖，不联网、不读取凭据。再新建智能体会话，确认能发现 `article-to-note`。ZIP 安装、旧副本迁移和排障见 [安装指南](docs/installation.md)。
 
 ## 开始使用
 
-安装后，直接在 Codex 聊天窗口里发送：
+在智能体聊天中发送，替换网址和笔记库路径：
 
-> 用 article-to-note 保存这篇文章：<文章 URL>。保留原文，下载配图，保存到 `<Obsidian 库路径>/Reading/文章主题/`。
+> 用 article-to-note 保存这篇文章：https://example.com/article。保留原文，下载配图，保留源副本，保存到 `<笔记库路径>/Reading/文章主题/`。
 
-将 `<文章 URL>` 和 `<Obsidian 库路径>` 替换成自己的网址和笔记库路径。库路径就是存放现有笔记的文件夹；目标文章目录应当尚不存在，由工具自动创建。完成后，在 Obsidian 打开生成的 `note.md` 即可。
+目标文章目录应尚不存在，由工具创建。笔记库就是存放 Markdown 笔记的文件夹，可直接选择 Obsidian vault。完成后打开 `note.md`，无需 Obsidian 插件。
 
-想边读边检验理解，可以继续说：
-
-> 对刚才保存的文章开启精读问答，一次只问一个问题，等我回答后再反馈，把记录保存在同目录的 learning.md。
-
-问答在 Codex 中进行，记录可以在 Obsidian 中阅读。下次换一个聊天，只要指定原来的文章目录就能继续。
-
-## 文章保存与翻译示例
-
-### 保留原文与配图
-
-> 用 article-to-note 保存这篇文章：<URL>。不要改写原文，下载图片，保留来源和作者信息；保存到 `<库路径>/Reading/文章主题/`。
-
-### 全文翻译成中文
-
-> 把这篇英文文章完整翻译成中文：<URL>。标题也翻译，保留代码、公式和图片位置，下载配图，保留原文，再加一段单独标注的学习总结。保存到 `<库路径>/Reading/文章主题/`。
-
-### 中英双语对照
-
-> 用 article-to-note 把这篇文章做成段落对齐的中英双语笔记：<URL>。图片只保留一份，代码保持原样，解释重要术语，保存到 `<库路径>/Reading/文章主题/`。
-
-### 保存知乎回答或专栏文章
-
-> 用 article-to-note 保存这个知乎单个回答：<回答 URL>。先检查能否复用我已经登录的浏览器，保留正文、作者、原链接和配图；如果内容被截断或图片下载失败，明确告诉我。
-
-Agent 会集中询问尚未确定的语言、标题、配图和保存偏好；已经在请求中说明的选项无需重复回答。如需复用个人偏好，可将 [preferences.example.json](preferences.example.json) 复制到技能仓库外，填写后告诉 Agent 使用哪个文件。当前请求优先，不会静默保存永久偏好。
-
-## 精读问答：从“存下来”到“说得清”
-
-精读是**可选模式**，普通保存和翻译不会自动开启。你可以随文章一起启用，也可以对已经保存的文章开始问答。
-
-Agent 会结合文章和你的阅读目标，每次保存并提出一个问题，等你回答后再继续。你的回答先原样落盘，随后保存 AI 反馈；每个问题都带有可核对的原文位置或片段。问题数量不固定，可以按你的节奏暂停、跳过或结束。
-
-### 玩法一：第一次读懂一个概念
-
-> 用 article-to-note 保存这篇文章：<URL>，然后开启精读问答。我是第一次接触这个主题，请从关键概念开始，一次只问一个问题，等我回答后指出理解中的缺口。把问答保存在文章目录的 learning.md 中。
-
-### 玩法二：用自己的话复述
-
-> 对 `<文章目录>` 开启精读问答。先让我用自己的话解释作者的核心观点，再根据我的回答追问。不要先给标准答案；反馈时区分作者的原意和你的补充解释。
-
-### 玩法三：把技术文章联系到项目
-
-> 精读 `<文章目录>` 中的文章。我的目标是判断这个方案是否适合自己的项目，请围绕适用条件、代价和失败场景逐个提问。每次等我回答后再反馈，最后保留完整问答记录。
-
-### 玩法四：检查论证与反例
-
-> 对这篇已保存的文章开启精读问答：`<文章目录>`。围绕“作者的结论由什么证据支持”“有哪些前提”“什么情况可能不成立”来问我。允许我不同意作者，但请检查我的理由是否充分。
-
-这些玩法使用同一套会话记录，由宿主 Agent 根据请求调整提问；不需要额外的模板、模型服务或 Obsidian 插件。
-
-### 一轮问答是什么样
-
-以下为虚构的交互示意，不是真实文章摘录或测试结果。实际问题与反馈以所读文章为依据：
-
-> **Agent：** 文中把缓存作为降低重复计算的方法。你认为缓存可能在什么情况下返回不合适的结果？
->
-> **你：** 数据更新了，但缓存还没有失效，可能会读到旧数据。
->
-> **Agent：** 你指出了数据新鲜度问题。接下来可以结合文章讨论的失效条件，检查这个解释是否覆盖所有情况。这是对你回答的反馈，补充推断会与原文观点分开标注。
->
-> **Agent：** 如果业务允许短时间读到旧数据，你会怎样权衡缓存时间？
->
-> *Agent 在这里等待你的下一次回答。*
-
-`learning.md` 会区分 **AI 提问、原文依据、用户回答、AI 反馈**。回答保留你提交的措辞和换行，AI 不会替你编写答案。AI 反馈仍可能有误，需要对照原文判断。
-
-### 暂停、跳过与下次继续
-
-| 你可以这样说 | 会话如何处理 |
+| 想做什么 | 可以这样说 |
 | --- | --- |
-| “先暂停，保存当前进度。” | 保留当前问题、已保存回答和反馈 |
-| “跳过这个问题，换下一个。” | 将尚未回答的问题标记为跳过，不生成虚构回答 |
-| “这个问题我没理解，先解释一下。” | 先澄清问题，保留待回答状态 |
-| “今天先结束。” | 结束本次会话，未完成的问题仍保留 |
-| “继续 `<文章目录>` 中的精读问答。” | 读取已有状态，接着等待回答、补反馈或提出下一题 |
+| 全文翻译 | 把这篇文章完整翻译成中文，标题也翻译，保留代码、公式、配图和源副本 |
+| 双语阅读 | 做成段落对齐的中英双语笔记，图片保留一份，解释重要术语 |
+| 保存知乎 | 保存这个单个回答或专栏文章，先尝试复用已登录浏览器，报告正文截断或配图失败 |
+| 开始精读 | 对刚保存的文章开启精读问答，一次问一个问题，等我回答后再反馈 |
+| 接着精读 | 继续 `<文章目录>` 的精读问答，从已保存的记录恢复，不要重新抓取 |
 
-换一个聊天也可以继续：
-
-> 用 article-to-note 继续 `<文章目录>` 里的精读问答。先读取学习记录和文章，从上次停下的地方接着来，不要重新抓取文章，也不要重问已完成的问题。
-
-继续需要宿主能够访问同一文章目录，并且已加载包含精读模式的 Skill 版本。如果中断发生在回答已保存、反馈尚未生成时，恢复后会先处理该回答的反馈。
-
-## 笔记如何保存在 Obsidian 中
-
-将目标目录指定在你的库内即可。选择保留原文、下载图片并启用精读时，典型结果为：
-
-```text
-Reading/文章主题/
-├── note.md                 # 文章成品：原文 / 翻译 / 双语
-├── source.md               # 抓取来源文本
-├── working.md              # 图片引用处理后的中间文本
-├── learning.md             # 可阅读的精读问答与继续提示
-├── learning.json           # 可恢复的学习会话状态
-├── manifest.json           # 来源、图片清单与警告
-├── capture-report.json     # 仅浏览器抓取时生成
-└── assets/                 # 成功下载的配图
-```
-
-`note.md` 链接到 `learning.md`；学习记录链接回文章笔记和原网页。启用问答只在文章末尾追加学习记录链接，不改写文章正文或 `source.md`。不启用精读时，不会创建 `learning.*`；选择不保留源副本时，验证后才清理未改动的 `source.md` 和 `working.md`。
-
-**继续学习时，请一起保留文章目录和 `learning.json`。** `learning.md` 是生成的阅读视图，手工编辑后脚本会停止更新以保护改动；个人追加想法建议另存笔记。缺失视图的重建、写入中断等恢复方式见 [精读问答流程](references/learning.md)。
-
-当前通过普通文件与相对图片链接兼容 Obsidian，没有专用插件、自动知识双链、Properties/frontmatter、重复文章识别或增量同步功能。
+翻译和问答使用宿主智能体的模型，无需另接模型 API；宿主和抓取服务各自的费用仍按对应服务计算。语言、标题、配图、源副本和保存位置由你选择。可选个人偏好模板见 [preferences.example.json](preferences.example.json)，填写后保存在技能目录之外，并告诉 Agent 使用哪个文件。
 
 ## 抓取配置
 
-### 普通网页
+**普通网页：**优先复用宿主已连接的 Firecrawl MCP、连接器或插件。没有可用连接时使用环境变量 `FIRECRAWL_API_KEY`；也可直接导入已有完整 Markdown/JSON。配置方法见 [凭据说明](references/cli.md#credential-setup)，密钥在本机私下设置，不发到聊天。
 
-优先使用 Codex 已连接的 Firecrawl（网页抓取服务）。没有可用连接时，Agent 会检查环境变量 `FIRECRAWL_API_KEY`；两者都没有才会提示配置。密钥请在本机私下设置，不要粘贴到聊天。已有完整 Markdown/JSON 文件也可直接导入。
+**知乎：**目前支持 `zhihu.com/question/.../answer/...` 的单个回答和 `zhuanlan.zhihu.com/p/...` 的专栏文章。在实际技能目录执行 `npm ci`（PowerShell 可用 `npm.cmd ci`），再运行 `node scripts/doctor.mjs --browser` 检查可选模块。
 
-具体设置见 [Firecrawl 凭据配置](references/cli.md#credential-setup)。翻译与问答使用宿主 Agent 的模型，无需额外接入翻译模型 API。
+Agent 先检查宿主能否读取已有浏览器会话；具备完整 DOM 观察能力时使用 [宿主浏览器桥接](references/host-browser.md)，否则按需使用 [本机浏览器后端](references/browser.md)。浏览器抓取不需要 Firecrawl key，也不会默认将登录态内容发送给 Firecrawl。
 
-### 知乎
+遇到登录、验证码、付费限制或疑似正文截断时，会报告问题。渲染页面“未发现明显截断”只是启发式检查；普通导入没有这些证据时标为 `not_assessed`。图片下载失败会保留远程链接并报告；全文翻译的完整性仍由 Agent 对照来源检查。
 
-保存知乎单个回答或专栏文章前，在安装目录执行一次依赖安装，并准备 Chrome/Edge 或兼容浏览器：
+## 精读问答
 
-**macOS / Linux**
+精读是可选模式，普通保存不会自动开启。你可以要求解释关键概念、用自己的话复述、联系项目评估方案，或检查论据与反例。Agent 每次保存并提出一个问题，等你的真实回答落盘后，再保存反馈和原文依据。
+
+`learning.json` 保存可恢复状态，`learning.md` 方便阅读。下次继续时保留整个文章目录；即使回答已保存而反馈中断，也能先补反馈。暂停、跳过、澄清和结束均不会编造你的回答。
+
+学习记录由工具维护；手动修改 `learning.md` 后会暂停更新以保护编辑。个人补充建议另存笔记。详细流程见 [精读说明](references/learning.md)。
+
+## 输出文件
+
+```text
+Reading/文章主题/
+├── note.md              # 原文 / 翻译 / 双语成品
+├── source.md            # 来源文本（可选保留）
+├── working.md           # 处理图片链接后的中间文本
+├── manifest.json        # 来源、配图与警告
+├── assets/              # 成功下载的配图
+├── capture-report.json  # 浏览器抓取时的检查报告
+├── learning.json        # 启用精读时的恢复状态
+└── learning.md          # 精读问答阅读视图
+```
+
+文章和学习记录相互链接。已有文章目录与成品不会被覆盖；选择不保留源副本时，只清理本次生成且未被修改的中间文件。当前提供普通 Markdown 和相对附件链接，不包含重复文章识别、自动双链或增量同步。
+
+## 兼容性与更新
+
+技能遵循 [Agent Skills 标准](https://agentskills.io/specification)，指令与脚本不绑定模型厂商。完整工作流要求宿主能加载技能、运行 Node.js 并访问目标笔记目录；网页连接器与浏览器能力由宿主提供。
+
+| 已验证 | 范围 |
+| --- | --- |
+| Codex | 本机桌面会话与 CLI 能发现现有用户副本；CLI 能发现临时项目的 `.agents/skills/` 副本 |
+| Skills CLI 1.7.4 | Windows 项目安装：Codex、Cursor 共用主副本，Claude Code 通过目录链接读取；另验证 Codex/Claude Code 复制安装 |
+| 脚本 | Windows/Chrome 合成页面、Markdown 导入、图片处理、学习恢复与安装自检 |
+| 尚未验证 | 各宿主真实站点的完整交互、macOS/Linux 本机运行、个人范围安装的完整验证 |
+
+安装成功不等于所有宿主都能读取已登录浏览器；桌面端、CLI、WSL 和云端环境也可能使用不同目录与工具。详细验证记录见 [安装指南](docs/installation.md#验证范围)。
+
+通过 Skills CLI 个人安装的副本更新：
 
 ```sh
-cd ~/.agents/skills/article-to-note
-npm ci
+npx skills update article-to-note -g
 ```
 
-**Windows PowerShell**
-
-```powershell
-Set-Location "$env:USERPROFILE\.agents\skills\article-to-note"
-npm.cmd ci
-```
-
-Agent 会先尝试复用可访问的已登录浏览器；该路径不需要 Firecrawl key。不要提前导出 Cookie 或配置调试端口。浏览器配置与访问问题见 [详细指南](docs/installation.md#第五步需要保存知乎文章时安装浏览器依赖)。
-
-## 知乎抓取与内容检查
-
-目前适配知乎单个回答（`zhihu.com/question/.../answer/...`）和专栏文章（`zhuanlan.zhihu.com/p/...`）。Agent 先检查宿主是否可以读取已登录的浏览器标签页，能力不可用时才回退到用户提供的本机 CDP 或独立浏览器配置目录。
-
-浏览器抓取记录正文折叠、CSS 截断、加载稳定性和配图情况；遇到登录、验证码、付费限制或疑似不完整正文时，不直接生成正常成品。不会导出 Cookie、自动登录、操作验证码或解锁付费内容，也不会默认将登录态页面内容发送给 Firecrawl。
-
-“未发现明显截断”是启发式检查，不是服务端全文保证。Firecrawl/普通导入没有渲染页面评估时，会标记为 `not_assessed`。完整翻译的语义审核仍由宿主 Agent 负责，图片验证也不能证明全文完整。
-
-配置与诊断详见 [宿主浏览器桥接](references/host-browser.md) 和 [浏览器后端](references/browser.md)。
-
-## 常见问题
-
-**需要 Obsidian 插件吗？**
-
-不需要。脚本写入普通 Markdown 文件与附件，Obsidian 可以直接读取。保存到其他 Markdown 目录同样可用。
-
-**需要另外购买翻译或问答模型 API 吗？**
-
-不需要额外接入翻译模型，语言工作使用宿主 Agent 的模型。宿主自身的订阅或调用费用，以及所选抓取服务的费用仍按对应服务计算。
-
-**所有智能体都能使用吗？**
-
-需要宿主支持 Skill 加载、脚本执行和目标文件访问；知乎路径还需要合适的浏览器工具。不同宿主的工具与权限不同，兼容性应分别验证。
-
-**图片会全部下载吗？**
-
-支持常见 Markdown 图片、引用式图片和 HTML `img/srcset`。下载失败会保留远程链接并报告；复杂 `picture/source`、CSS 背景图等可能需要额外处理。图片里的文字不会自动重绘或翻译。
-
-**能修改学习记录吗？**
-
-可以用 Obsidian 阅读，但 `learning.md` 是脚本管理的视图。直接编辑后脚本会拒绝覆盖，需先保留并处理改动再继续。不要手工修改 `learning.json` 来调整进度；通过对话暂停、跳过或继续即可。
+先备份自行修改的技能文件。源码仓库、Git 克隆副本、桌面端已有独立副本不会自动同步；不要同时保留多份同名旧技能。旧版迁移见 [已有安装](docs/installation.md#已有安装与重复副本)。
 
 ## 开发与验证
 
-在项目目录安装可选依赖并运行测试：
+仅验证核心功能，无需安装依赖或打开浏览器：
+
+```sh
+npm run check
+npm run test:core
+```
+
+完整测试需要可选依赖和已安装的 Chrome：
 
 ```sh
 npm ci
 npm test
 ```
 
-不运行浏览器测试时，可以只检查抓取工具和学习会话：
+浏览器测试用合成页面和隔离临时配置，不读取用户登录态，也不调用收费服务。可用 `ARTICLE_NOTE_TEST_CHANNEL=msedge` 或 `chromium` 选择其他浏览器，见 [浏览器测试](references/browser.md#tests)。CI 配置覆盖 Windows/Linux 和 Node.js 20/22/24 的核心测试，运行结果以仓库 Actions 为准。
 
-```sh
-node --test tests/article-note.test.mjs tests/learning-note.test.mjs
-```
+Agent 入口：[SKILL.md](SKILL.md)；命令参考：[CLI](references/cli.md)。预览外部 Markdown 时使用禁用活动 HTML 的查看器。
 
-浏览器测试使用真实 Chrome、合成页面和隔离的临时配置目录，不读取用户的实际登录态，不调用收费 API。当前已完成 Windows/Chrome 测试，尚未完成真实知乎登录页面及 macOS/Linux 验证。
+## 反馈
 
-脚本入口：
-
-```sh
-node scripts/article-note.mjs --help
-node scripts/learning-note.mjs --help
-```
-
-完整抓取命令见 [CLI 文档](references/cli.md)，精读会话指令见 [学习流程](references/learning.md)，Agent 入口见 [SKILL.md](SKILL.md)。Markdown 正文不进行 HTML 消毒，预览时应禁用活动 HTML。
-
-## 反馈与贡献
-
-欢迎反馈抓取不完整、图片遗漏、翻译结构或精读恢复问题。报告时请提供宿主、操作系统、浏览器版本、复现步骤和不含隐私的错误信息；如可公开，可附原始 URL。涉及登录态、个人回答或非公开文章时，请使用合成示例复现，不上传 Cookie、密钥或私人笔记。
+欢迎报告抓取、翻译覆盖、配图或学习恢复问题。请提供版本、自检结果、宿主、操作系统和复现步骤，移除私人路径、凭据与非公开正文后再提交。
